@@ -1,0 +1,141 @@
+$.getJSON 'paths.php', (data) ->
+  # NOTE here we are just using getSelector so we don't have to rewrite the code for each of the supported libraries.
+  # you can just use the approriate selector from the library you're using, if you want to. like $(".shape) on jquery, for example.
+  nodes = $(".node")
+  eps = $(".ep")
+
+  placeNodes(nodes)
+  initPlumb(nodes, eps)
+    
+  # loop through them and connect each one to each other one.
+  for d in data          
+    connect(d)
+
+  # click to detach
+  jsPlumb.bind "click", (c) -> 
+    jsPlumb.detach(c)
+
+  # create connection
+  jsPlumb.bind "beforeDrop", (info) ->
+    info.nodes = prompt("Nodes", 10)
+    $.ajax
+      url: 'paths'
+      type: 'POST'
+      dataType: 'json'
+      data:
+        "path[sourceId]": info.sourceId
+        "path[targetId]": info.targetId
+        "path[nodes]": info.nodes
+      success: (info) ->
+        connect(info)
+    false
+
+  # remove connection
+  jsPlumb.bind "beforeDetach", (c) ->
+    info = c.getParameter('info')
+    $.ajax
+      url: 'paths/' + info.id
+      type: 'DELETE'
+      dataType: 'json'
+    true
+
+
+placeCity = (e, x, y, pos, width) ->
+    e.css
+        left: width*(0.038*x-4.74)+pos.left
+        top: width*(1.525-0.0345*y)+pos.top
+
+# connect = (info) ->
+#   connection = jsPlumb.connect
+#     source: info.sourceId  # just pass in the current node in the selector for source 
+#     target: info.targetId
+#     # here we supply a different anchor for source and for target, and we get the element's "data-shape"
+#     # attribute to tell us what shape we should use, as well as, optionally, a rotation value.
+#     anchor: "Continuous"
+#     parameters:
+#       info: info
+
+#   text = connection.sourceId + "->" + connection.targetId + ":" + info.nodes
+#   connection.getOverlay("label").setLabel(text)
+
+# lastPos = null
+# lastWidth = null
+# placeNodes = (nodes) ->
+#   p = nodes.parent()
+#   lastPos = p.position()
+#   lastWidth = p.width()
+
+#   width = lastWidth / 2.35
+#   height = width * 2 / 3
+#   num = nodes.length
+
+#   p.height(lastWidth * 2 / 3 + 50)
+
+#   nodes.each (i, e) ->
+#     $e = $(e)
+#     pos = $e.position()
+
+#     $e.css
+#       top: pos.top + height * (Math.cos(6.28*i/num) + 1)
+#       left: pos.left + width * (Math.sin(6.28*i/num) + 1)
+
+#   $(window).resize ->
+#     replaceNodes(nodes)
+
+# replaceNodes = (nodes) ->
+#   p = nodes.parent()
+#   currPos = p.position()
+
+#   if currPos.left != lastPos.left or currPos.top != lastPos.top
+#     currWidth = p.width()
+#     percent = currWidth / lastWidth
+#     console.log percent
+
+#     p.height(currWidth * 2 / 3 + 50)
+
+#     nodes.each (i, e) ->
+#       $e = $(e)
+#       pos = $e.position()
+
+#       $e.css
+#         top: (pos.top - lastPos.top) * percent + currPos.top
+#         left: (pos.left - lastPos.left) * percent + currPos.left
+
+#     lastPos = currPos
+#     lastWidth = currWidth
+
+#     jsPlumb.repaintEverything()
+
+# initPlumb = (nodes, eps) ->
+#   jsPlumb.setRenderMode(jsPlumb.CANVAS)
+#   jsPlumb.importDefaults
+#     Connector: "StateMachine"
+#     PaintStyle: 
+#       lineWidth: 3
+#       strokeStyle: "#ccc"
+#     Endpoint: ["Dot", {radius: 5}]
+#     EndpointStyle: 
+#       fillStyle: "#ccc"
+#     # the overlays to decorate each connection with.  note that the label overlay uses a function to generate the label text; in this
+#     # case it returns the 'labelText' member that we set on each connection in the 'init' method below.
+#     ConnectionOverlays: [
+#       ["Arrow", {location: 0.9}],
+#       ["Label", {location: 0.2, id: "label", cssClass: "aLabel"}]
+#     ]
+
+#   # make everything draggable
+#   jsPlumb.draggable(nodes)
+
+#   # make eps sources
+#   eps.each (i,e) ->
+#     $e = $(e)
+#     $p = $e.parent()
+#     jsPlumb.makeSource $e,
+#       parent: $p
+#       anchor: "Continuous"
+
+#   # make nodes targets
+#   jsPlumb.makeTarget nodes, 
+#     dropOptions:
+#       hoverClass: "dragHover"
+#     anchor: "Continuous"

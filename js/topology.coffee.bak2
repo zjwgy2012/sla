@@ -1,0 +1,36 @@
+paper = null
+set = null
+
+$ ->
+  $.getJSON 'paths.php', (data) ->
+    placeNodes(data[0])
+    $(window).resize ->
+      placeNodes(data[0])
+
+  $map = $("#map")
+  width = $map.width()
+  pos = $map.position()
+  Raphael "map", width, width/2, ->
+    connections = data[1]
+    @setStart()
+    for c in connections
+      connect c
+    set = @setFinish()
+
+placeNodes = (routers) ->
+  $map = $('#map')
+  pos = $map.position()
+  width = $map.width()
+  for name, lat of routers
+    if not $('#'+name).length
+      $('#map').append "<div id='#{name}' class='router'></div>"
+    placeNode $('#'+name), lat, pos, width
+
+placeNode = (e, lat, pos, width) ->
+  e.css
+    left: width*(0.038*lat[0]-4.74)+38+pos.left-e.width()/2
+    top: width*(1.525-0.0345*lat[1])+30+pos.top-e.height()/2
+
+connect = (info) ->
+  sourcePos = $('#'+info.sourceID).position()
+  destPos = $('#'+info.destID).position()

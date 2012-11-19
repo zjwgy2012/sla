@@ -1,0 +1,63 @@
+.label {
+	z-index: 10;
+}
+
+.node {
+	z-index: 5;
+}
+
+.router {
+	background-image: url('../img/router.png');
+	background-repeat: no-repeat;
+	width: 71px;
+	height: 44px;
+	position: absolute;
+}
+
+.ep {
+	float: right;
+	cursor: pointer;
+}
+
+.tip {
+	position: absolute;
+	display: none;
+	border: none;
+	padding: 3px 8px;
+	border-radius: 3px;
+	font-size: 10px;
+	background-color: #222;
+	color: white;
+	z-index: 1100;
+}
+
+.pagination {
+	margin: 0;
+}
+
+table.data-table thead tr th.sorting {
+	background-image: url('../img/table-sort.png');
+	background-repeat: no-repeat;
+	background-position: right 10px;
+}
+
+table.data-table thead tr th.sorting_asc {
+	background : url('../img/table-sort.png') no-repeat right -18px;
+}
+
+table.data-table thead tr th.sorting_desc {
+	background : url('../img/table-sort.png') no-repeat right -50px;
+}
+
+table th.nbt, table td.nbt {
+	border-top: 0;
+}
+
+.footer {
+	padding: 30px 0;
+}
+
+body > .navbar .brand {
+	color: #777;
+	font-size: 13px;
+}
